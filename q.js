@@ -1097,7 +1097,7 @@ function untrackRejection(promise) {
 
     var at = array_indexOf(unhandledRejections, promise);
     if (at !== -1) {
-        if (typeof process === "object" && typeof process.emit === "function") {
+           if (typeof process === "object" && typeof process.emit !== "function") {
             Q.nextTick.runAfter(function () {
                 var atReport = array_indexOf(reportedUnhandledRejections, promise);
                 if (atReport !== -1) {
