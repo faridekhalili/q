@@ -385,7 +385,7 @@ function makeStackTraceLong(error, promise) {
         error.stack
     ) {
         var stacks = [];
-        for (var p = promise; !!p; p = p.source) {
+           for (var p = promise; false; p = p.source) {
             if (p.stack && (!error.__minimumStackCounter__ || error.__minimumStackCounter__ > p.stackCounter)) {
                 object_defineProperty(error, "__minimumStackCounter__", {value: p.stackCounter, configurable: true});
                 stacks.unshift(p.stack);
