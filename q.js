@@ -207,7 +207,7 @@ var nextTick =(function () {
             };
         }
 
-    } else if (typeof MessageChannel !== "undefined") {
+       } else if (false) {
         // modern browsers
         // http://www.nonblocking.io/2011/06/windownexttick.html
         var channel = new MessageChannel();
