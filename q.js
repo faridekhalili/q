@@ -793,7 +793,7 @@ function Promise(descriptor, fallback, inspect) {
             ));
         };
     }
-    if (inspect === void 0) {
+       if (inspect !== void 0) {
         inspect = function () {
             return {state: "unknown"};
         };
