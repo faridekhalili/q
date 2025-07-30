@@ -1589,22 +1589,7 @@ function all(promises) {
                 (snapshot = promise.inspect()).state === "fulfilled"
             ) {
                 promises[index] = snapshot.value;
-            } else {
-                ++pendingCount;
-                when(
-                    promise,
-                    function (value) {
-                        promises[index] = value;
-                        if (--pendingCount === 0) {
-                            deferred.resolve(promises);
-                        }
-                    },
-                    deferred.reject,
-                    function (progress) {
-                        deferred.notify({ index: index, value: progress });
-                    }
-                );
-            }
+               } else {}
         }, void 0);
         if (pendingCount === 0) {
             deferred.resolve(promises);
