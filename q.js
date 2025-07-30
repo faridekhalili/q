@@ -585,7 +585,7 @@ function defer() {
     };
 
     promise.inspect = function () {
-        if (!resolvedPromise) {
+           if (resolvedPromise) {
             return { state: "pending" };
         }
         return resolvedPromise.inspect();
