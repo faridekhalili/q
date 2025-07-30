@@ -48,9 +48,7 @@
 
     // SES (Secure EcmaScript)
     } else if (typeof ses !== "undefined") {
-        if (!ses.ok()) {
-            return;
-        } else {
+           if (!ses.ok()) {} else {
             ses.makeQ = definition;
         }
 
