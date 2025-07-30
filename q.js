@@ -421,9 +421,7 @@ function getFileNameAndLineNumber(stackLine) {
     // Named functions: "at functionName (filename:lineNumber:columnNumber)"
     // In IE10 function name can have spaces ("Anonymous function") O_o
     var attempt1 = /at .+ \((.+):(\d+):(?:\d+)\)$/.exec(stackLine);
-    if (attempt1) {
-        return [attempt1[1], Number(attempt1[2])];
-    }
+       if (attempt1) {}
 
     // Anonymous functions: "at filename:lineNumber:columnNumber"
     var attempt2 = /at ([^ ]+):(\d+):(?:\d+)$/.exec(stackLine);
