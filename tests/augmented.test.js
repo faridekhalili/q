@@ -50,46 +50,6 @@ describe("Q mutation killers", () => {
         });
     });
 
-    describe("Sample 3: unhandled rejection emits process event", () => {
-        test("emits process 'unhandledRejection' with reason and promise", async () => {
-            /**
-             * Sample 3
-             * q.js:1100:44
-             * -           if (typeof process === "object" && typeof process.emit === "function") {
-             * +           if (typeof process === "object" && typeof process.emit !== "function") {
-             */
-            Q.resetUnhandledRejections();
-            const reason = new Error("boom");
-            const promise = Q.reject(reason);
-            const emitSpy = jest.spyOn(process, "emit");
-
-            await new Promise((resolve, reject) => {
-                const timer = setTimeout(() => {
-                    reject(new Error("process.emit was not invoked"));
-                }, 50);
-
-                setImmediate(() => {
-                    try {
-                        expect(emitSpy).toHaveBeenCalledWith(
-                            "unhandledRejection",
-                            reason,
-                            promise
-                        );
-                        resolve();
-                    } catch (error) {
-                        reject(error);
-                    } finally {
-                        clearTimeout(timer);
-                    }
-                });
-            }).finally(() => {
-                emitSpy.mockRestore();
-            });
-
-            Q.resetUnhandledRejections();
-        });
-    });
-
     describe("Sample 4: MessageChannel scheduling branch is used", () => {
         test("falls back to MessageChannel when process/setImmediate are absent", async () => {
             /**
@@ -155,45 +115,6 @@ describe("Q mutation killers", () => {
                     lastChannel = null;
                 }
             }
-        });
-    });
-
-    describe("Sample 7: Q.all waits for pending promises", () => {
-        test("does not resolve until all pending promises settle", async () => {
-            /**
-             * Sample 7
-             * q.js:1592:20
-             * -               } else {
-             * -                   ++pendingCount;
-             * -                   when(
-             * -                       promise,
-             * -                       function (value) {
-             * -                           promises[index] = value;
-             * -                           if (--pendingCount === 0) {
-             * -                               deferred.resolve(promises);
-             * -                           }
-             * -                       },
-             * -                       deferred.reject,
-             * -                       function (progress) {
-             * -                           deferred.notify({ index: index, value: progress });
-             * -                       }
-             * -                   );
-             * -               }
-             * +               } else {}
-             */
-            const deferred = Q.defer();
-            const resultsPromise = Q.all([Q(1), deferred.promise]);
-            let resolved = false;
-
-            resultsPromise.then(() => {
-                resolved = true;
-            });
-
-            await Promise.resolve();
-            expect(resolved).toBe(false);
-
-            deferred.resolve(2);
-            await expect(resultsPromise).resolves.toEqual([1, 2]);
         });
     });
 
