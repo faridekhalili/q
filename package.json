@@ -44,6 +44,7 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "jest": "^29.7.0",
     "cover": "*",
     "grunt": "~0.4.1",
     "grunt-cli": "~0.1.9",
@@ -55,7 +56,8 @@
     "promises-aplus-tests": "1.x"
   },
   "scripts": {
-    "test": "npm ls -s && jasmine-node spec && promises-aplus-tests spec/aplus-adapter && npm run -s lint",
+    "test": "npm ls -s && jasmine-node spec && promises-aplus-tests spec/aplus-adapter && npm run -s lint && npm run -s test:jest",
+    "test:jest": "jest",
     "test-browser": "opener spec/q-spec.html",
     "benchmark": "matcha",
     "lint": "jshint q.js",
@@ -69,6 +71,12 @@
         "system": ">=0.0.4"
       }
     }
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/tests/**/*.test.js"
+    ]
   },
   "directories": {
     "test": "./spec"
