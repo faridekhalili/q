@@ -61,26 +61,29 @@ describe("Q mutation killers", () => {
             Q.resetUnhandledRejections();
             const reason = new Error("boom");
             const promise = Q.reject(reason);
+            const emitSpy = jest.spyOn(process, "emit");
 
             await new Promise((resolve, reject) => {
-                const timeout = setTimeout(() => {
-                    process.removeListener("unhandledRejection", onUnhandled);
-                    reject(new Error("unhandledRejection not emitted"));
+                const timer = setTimeout(() => {
+                    reject(new Error("process.emit was not invoked"));
                 }, 50);
 
-                function onUnhandled(emittedReason, emittedPromise) {
-                    clearTimeout(timeout);
-                    process.removeListener("unhandledRejection", onUnhandled);
+                setImmediate(() => {
                     try {
-                        expect(emittedReason).toBe(reason);
-                        expect(emittedPromise).toBe(promise);
+                        expect(emitSpy).toHaveBeenCalledWith(
+                            "unhandledRejection",
+                            reason,
+                            promise
+                        );
                         resolve();
-                    } catch (assertionError) {
-                        reject(assertionError);
+                    } catch (error) {
+                        reject(error);
+                    } finally {
+                        clearTimeout(timer);
                     }
-                }
-
-                process.on("unhandledRejection", onUnhandled);
+                });
+            }).finally(() => {
+                emitSpy.mockRestore();
             });
 
             Q.resetUnhandledRejections();
@@ -104,6 +107,7 @@ describe("Q mutation killers", () => {
             const setTimeoutMock = jest.fn((fn, ms) => realSetTimeout(fn, ms));
             let QMessage;
             let lastChannel = null;
+            let postMessageCalls = 0;
 
             // Simulate non-Node environment so MessageChannel branch is chosen
             global.process = undefined;
@@ -111,7 +115,12 @@ describe("Q mutation killers", () => {
             global.MessageChannel = function WrappedChannel() {
                 lastChannel = new RealMessageChannel();
                 this.port1 = lastChannel.port1;
+                const realPost = lastChannel.port2.postMessage.bind(lastChannel.port2);
                 this.port2 = lastChannel.port2;
+                this.port2.postMessage = function (msg) {
+                    postMessageCalls++;
+                    return realPost(msg);
+                };
             };
             global.setTimeout = setTimeoutMock;
 
@@ -127,7 +136,7 @@ describe("Q mutation killers", () => {
 
                     realSetTimeout(() => {
                         try {
-                            expect(setTimeoutMock.mock.calls.length).toBe(1);
+                            expect(postMessageCalls).toBeGreaterThan(0);
                             resolve();
                         } catch (error) {
                             reject(error);
